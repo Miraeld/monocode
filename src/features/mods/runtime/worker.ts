@@ -156,7 +156,8 @@ export function createRuntime(post: (message: WorkerToHost) => void) {
       request: (url, options) => call("http.request", [url, options ?? {}]),
     },
     store: {
-      get: (key) => call("store.get", [key]),
+      // Rust sends a missing key as null; the API promises undefined.
+      get: async (key) => (await call("store.get", [key])) ?? undefined,
       set: async (key, value) => {
         await call("store.set", [key, value]);
         invalidate();
@@ -173,7 +174,10 @@ export function createRuntime(post: (message: WorkerToHost) => void) {
       after: (ms, fn) => timer(setTimeout(fn, ms), false),
     },
     config,
-    env: { get: (name) => call("env.get", [name]) },
+    env: {
+      get: async (name) =>
+        (await call<string | null>("env.get", [name])) ?? undefined,
+    },
     session: {
       current: () =>
         call<SessionInfo | null>("session.current", [sessionId ?? null]),

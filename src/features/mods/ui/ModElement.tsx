@@ -358,6 +358,8 @@ function ModInput({ props }: { props: InputProps }) {
     if (event.key !== "Enter" || event.nativeEvent.isComposing) return;
     event.preventDefault();
     invoke(props.onSubmit, [value]);
+    // An echo of the same value skips the effect, so adopt it here to let submit-then-clear work.
+    setValue(external);
   };
   return (
     <label className="flex h-7 min-w-0 flex-1 items-center gap-2 rounded-md border border-content/10 px-2 focus-within:border-content/20">

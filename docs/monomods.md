@@ -42,8 +42,8 @@ Discovery paths, scanned in this order (first `name` wins; Settings shows each m
 ## Lifecycle
 
 1. **Discover.** Rust scans the paths and returns manifests (`mods_list`). Invalid manifests show up in Settings with the error, never loaded.
-2. **Enable.** Settings > Mods shows the permissions as a consent sheet. `process` entries that run any code they are given (shells, `rm`, `env`, `find`, `xargs`, `osascript`, interpreters) show as "full shell access". The sheet also says every mod sees session tool calls and their output. Rust records the consent together with a hash of `mod.json`. A changed manifest asks again.
-3. **Bundle.** The host bundles the entry with `esbuild-wasm` and caches it under `$APPDATA/mods/<name>/<contentHash>.js`.
+2. **Enable.** Settings > Mods shows the permissions as a consent sheet. `process` entries that run any code they are given (shells, `rm`, `env`, `find`, `xargs`, `osascript`, interpreters, `git`, `gh`) show as "full shell access". The sheet also says every mod sees session tool calls and their output. Rust records the consent together with a hash of `mod.json`. A changed manifest asks again.
+3. **Bundle.** The host bundles the entry with `esbuild-wasm` and caches it in memory per window, keyed by the `mod.json` hash. Enabling or reloading a mod rebuilds it from the current source.
 4. **Load.** The host mounts a hidden `<iframe src="monomod://localhost/<name>">` and posts `{kind:"load", code, config}`. The frame starts a Worker from a blob, the worker runs `register(on, $)`, then replies `ready` with its subscriptions.
 5. **Run.** The host routes events into the worker and answers its RPC calls. Each `ui.render` is requested again after `invalidate`, after an atom write, or after a store write made by the mod.
 6. **Hot reload.** For unpacked mods, a file-change event or the Reload button sends `unload`, tears down the frame, re-bundles and loads again. In-memory state is lost; `$.store` survives.

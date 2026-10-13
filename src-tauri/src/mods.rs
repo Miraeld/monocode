@@ -394,7 +394,8 @@ fn env_key_allowed(key: &str) -> bool {
         && !EXEC_ENV.contains(&key)
         && !key.starts_with("LD_")
         && !key.starts_with("DYLD_")
-        // GIT_SSH_COMMAND, GIT_CONFIG_*, GIT_DIR, GIT_EXEC_PATH and friends.
+        // GIT_SSH_COMMAND, GIT_CONFIG_*, GIT_DIR, GIT_EXEC_PATH and friends. Arguments
+        // (`-c alias.x=!cmd`) still run code, so the consent sheet treats git as full access.
         && !key.starts_with("GIT_")
 }
 
@@ -443,10 +444,11 @@ pub async fn mod_exec(
         let output = crate::harness::exec_output(&command, &args, cwd.as_deref(), timeout)?;
         let is_stdout_truncated = output.stdout.len() > MAX_STDOUT;
         let stdout = &output.stdout[..output.stdout.len().min(MAX_STDOUT)];
+        let stderr = &output.stderr[..output.stderr.len().min(MAX_STDOUT)];
         Ok(ProcessResult {
             exit_code: output.status.code().unwrap_or(-1),
             stdout: String::from_utf8_lossy(stdout).into_owned(),
-            stderr: String::from_utf8_lossy(&output.stderr).into_owned(),
+            stderr: String::from_utf8_lossy(stderr).into_owned(),
             is_stdout_truncated,
         })
     })

@@ -498,6 +498,8 @@ export const modHost: ModHost = {
     const record = records.find((r) => r.name === name);
     if (!record) return;
     crashed.delete(name);
+    // The bundle key is the manifest hash, so pick up source edits on enable.
+    if (enabled) forgetBundle(name);
     await setModEnabled(
       ctx?.project() ?? null,
       name,

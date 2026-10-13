@@ -22,6 +22,8 @@ const SHELLS = new Set([
   "sh", "bash", "zsh", "fish", "dash", "ksh", "csh", "tcsh", "rm", "sudo",
   "env", "xargs", "find", "osascript", "node", "deno", "bun", "npx", "npm",
   "python", "python3", "perl", "ruby", "php", "lua",
+  // `-c alias.x=!cmd`, `alias set --shell` and friends run anything.
+  "git", "gh",
 ]);
 
 /** What a mod may touch, in the words the consent sheet uses. */
